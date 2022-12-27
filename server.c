@@ -1,6 +1,9 @@
 #include<stdio.h>
 #include<winsock2.h>
 #include<ws2tcpip.h>
+#include <unistd.h>
+
+#define PORT 8080
 
 #pragma comment(lib,"ws2_32.lib")
 
@@ -10,6 +13,8 @@ int main(int argc,char*argv[]){
     struct sockaddr_in server;
     struct sockaddr_in client;
     int c=sizeof(struct sockaddr_in);
+    char str[20],str2[20];
+    int a,n;
 
     // Initialising Winsock
     if(WSAStartup(MAKEWORD(2,2),&wsa)!=0){
@@ -28,25 +33,38 @@ int main(int argc,char*argv[]){
     // Setting sockaddr struct
     server.sin_addr.s_addr=inet_addr("127.0.0.1");
     server.sin_family=AF_INET;
-    server.sin_port=htons(8080);
+    server.sin_port=htons(PORT);
 
     if(bind(s,(struct sockaddr*)&server,sizeof(server))==SOCKET_ERROR){
         printf("\nFailed to bind : %d",WSAGetLastError());
     }
     printf("\nServer bind");
 
-    listen(s,5);
-    while(1){
+    listen(s,1);
         new_s=accept(s,(struct sockaddr*)&client,&c);
         if(new_s==INVALID_SOCKET){
            printf("\nFailed to accept : %d",WSAGetLastError());
         }
         printf("\nAccepted");
         
+    read(new_s,str,sizeof(str));
+    printf("error:%d",WSAGetLastError());
+
+    do
+    {
+        printf("\n client msg:%s",str);
+        printf("\n server msg:");
+        scanf("%s",str2);
+        write(new_s,str2,sizeof(str2));
+        listen(new_s,1);
+        read(new_s,str,sizeof(str));
+        n=strcmp(str,"BYE");
+        a=strcmp(str2,"BYE");
     }
+    while(n!=0&&a!=0);
     
 
-
-    // closesocket(s);
-    // WSACleanup();
+    closesocket(s);
+    closesocket(new_s);
+    WSACleanup();
 }
