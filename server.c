@@ -3,7 +3,7 @@
 #include<ws2tcpip.h>
 #include <unistd.h>
 
-#define PORT 8080
+#define PORT 5005
 
 #pragma comment(lib,"ws2_32.lib")
 
@@ -47,7 +47,7 @@ int main(int argc,char*argv[]){
         }
         printf("\nAccepted");
         
-    read(new_s,str,sizeof(str));
+    recv(new_s,str,sizeof(str),0);
     printf("error:%d",WSAGetLastError());
 
     do
@@ -55,9 +55,9 @@ int main(int argc,char*argv[]){
         printf("\n client msg:%s",str);
         printf("\n server msg:");
         scanf("%s",str2);
-        write(new_s,str2,sizeof(str2));
+        send(new_s,str2,sizeof(str2),0);
         listen(new_s,1);
-        read(new_s,str,sizeof(str));
+        recv(new_s,str,sizeof(str),0);
         n=strcmp(str,"BYE");
         a=strcmp(str2,"BYE");
     }
