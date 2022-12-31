@@ -1,49 +1,59 @@
-#include<stdio.h>
-#include<sys/socket.h>
-#include<netinet/in.h>
+#include <netinet/in.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/socket.h>
 #include <unistd.h>
 #include<errno.h>
-#include <arpa/inet.h>
-#include <string.h>
+
+#define PORT 8080
 
 
-#define PORT 5005
-
-
-int main(int argc,char*argv[]){
-    int s,new_s;
-    struct sockaddr_in server;
-    struct sockaddr_in client;
-    int c=sizeof(struct sockaddr_in);
+int main(int argc,char const* argv[]){
+    int server_fd, new_socket, valread;
+    struct sockaddr_in address;
+    int addrlen = sizeof(address);
     char str[20],str2[20];
     int a,n;
-
+    int optval = 1;
     // Creating a socket
-    if((s=socket(AF_INET,SOCK_STREAM,0))<0){
-        printf("\nFailed to create Socket : %d",errno);
+    if((server_fd=socket(AF_INET,SOCK_STREAM,0))<0){
+        printf("\nFailed to create Socket : %d s : %d",errno,server_fd);
         return 1;
     }
     printf("\nSocket Created");
-     int optval = 1;
-    setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
-    // Setting sockaddr struct
-    server.sin_addr.s_addr=inet_pton(AF_INET, "172.31.4.174", &(server.sin_addr));
-    server.sin_family=AF_INET;
-    server.sin_port=htons(PORT);
+    if (setsockopt(server_fd, SOL_SOCKET,
+                   SO_REUSEADDR | SO_REUSEPORT, &optval,
+                   sizeof(optval))) {
+        perror("setsockopt");
+        exit(EXIT_FAILURE);
+    }    // Setting sockaddr struct
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port = htons(PORT);
 
-    if(bind(s,(struct sockaddr*)&server,sizeof(server))<0){
-        printf("\nFailed to bind : %d",errno);
+    if (bind(server_fd, (struct sockaddr*)&address,
+             sizeof(address))
+        < 0) {
+        perror("bind failed");
+        exit(EXIT_FAILURE);
     }
-    printf("\nServer bind");
-
-    listen(s,1);
-        new_s=accept(s,(struct sockaddr*)&client,&c);
-        if(new_s<0){
-           printf("\nFailed to accept : %d",errno);
-        }
+    printf("server bind");
+    if (listen(server_fd, 3) < 0) {
+        perror("listen");
+        exit(EXIT_FAILURE);
+    }
+     printf("\nlistening...");
+        if ((new_socket
+         = accept(server_fd, (struct sockaddr*)&address,
+                  (socklen_t*)&addrlen))
+        < 0) {
+        perror("accept");
+        exit(EXIT_FAILURE);
+    }
         printf("\nAccepted");
         
-    recv(new_s,str,sizeof(str),0);
+    recv(new_socket,str,sizeof(str),0);
     printf("error:%d",errno);
 
     do
@@ -51,15 +61,15 @@ int main(int argc,char*argv[]){
         printf("\n client msg:%s",str);
         printf("\n server msg:");
         scanf("%s",str2);
-        send(new_s,str2,sizeof(str2),0);
-        listen(new_s,1);
-        recv(new_s,str,sizeof(str),0);
+        send(new_socket,str2,sizeof(str2),0);
+        listen(new_socket,1);
+        recv(new_socket,str,sizeof(str),0);
         n=strcmp(str,"BYE");
         a=strcmp(str2,"BYE");
     }
     while(n!=0&&a!=0);
     
 
-    close(s);
-    close(new_s);
+    close(server_fd);
+    close(new_socket);
 }
