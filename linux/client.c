@@ -1,36 +1,49 @@
-#include<stdio.h>
-#include<sys/socket.h>
-#include<netinet/in.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/socket.h>
 #include <unistd.h>
 #include<errno.h>
-#include <arpa/inet.h>
-#include <string.h>
 
-#define PORT 5005
+#define PORT 8080
 
 
-int main(int argc,char*argv[]){
-    int s;
+int main(int argc,char const* argv[]){
+    int s,client_fd;
     struct sockaddr_in client;
     char str[20],str2[20];
     int a;
 
-
+     int optval = 1;
     // Creating a socket
     if((s=socket(AF_INET,SOCK_STREAM,0))<0){
-        printf("\nFailed to create Socket : %d",errno);
+        printf("\nFailed to create Socket : %d s : %d",errno,s);
         return 1;
     }
     printf("\nSocket Created");
+    if (setsockopt(s, SOL_SOCKET,
+                   SO_REUSEADDR | SO_REUSEPORT, &optval,
+                   sizeof(optval))) {
+        perror("setsockopt");
+        exit(EXIT_FAILURE);
+    }    // Setting sockaddr struct
+    client.sin_family = AF_INET;
+    client.sin_port = htons(PORT);
+     if (inet_pton(AF_INET, "127.0.0.1", &client.sin_addr)
+        <= 0) {
+        printf(
+            "\nInvalid address/ Address not supported \n");
+        return -1;
+    }
+    if ((client_fd
+         = connect(s, (struct sockaddr*)&client,
+                   sizeof(client)))
+        < 0) {
+        printf("\nConnection Failed:%d \n",errno);
+        return -1;
 
-    // Setting sockaddr struct
-    client.sin_addr.s_addr=inet_pton(AF_INET, "172.31.4.174", &(client.sin_addr));
-    client.sin_family=AF_INET;
-    client.sin_port=htons(PORT);
-
-    if(connect(s,(struct sockaddr*)&client,sizeof(client))<0){
-        printf("\nFailed to connect : %d",errno);
-        return 1;
     }
     printf("\nSocket connected");
     
