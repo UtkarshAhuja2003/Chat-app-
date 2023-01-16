@@ -54,7 +54,7 @@ int main(int argc,char*argv[]){
         printf("\nclient msg:");
         scanf("%s",&str);
         a=strcmp(str2,"BYE");
-        send(s,str2,sizeof(str2),0);
+        send(s,str,sizeof(str),0);
     }
     while(a!=0);
 

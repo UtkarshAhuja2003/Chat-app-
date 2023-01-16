@@ -48,7 +48,6 @@ int main(int argc,char*argv[]){
         printf("\nAccepted");
         
     recv(new_s,str,sizeof(str),0);
-    printf("error:%d",WSAGetLastError());
 
     do
     {
