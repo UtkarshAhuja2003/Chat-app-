@@ -29,7 +29,7 @@ This is a simple command-line chat application that uses socket programming to e
 
 - Chat will continue until both the users write **BYE**
 
-## Sreenshot
+## Screenshot
 ![image](https://user-images.githubusercontent.com/70762626/214885657-dd8f8871-14a3-484b-9606-244dbf240cca.png)
 
 
