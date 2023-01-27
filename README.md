@@ -1,4 +1,4 @@
-# Socket Programming Chat App
+# Socket Programming Chat Room
 
 This is a simple command-line chat application that uses socket programming to establish a connection between the client and the server. The application is developed in C and supports both Windows and Linux operating systems.
 
